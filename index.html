@@ -107,10 +107,18 @@
            document.getElementById('loginForm').style.display = "none";
            document.getElementById('externalForm').style.display = "none";
            const statusText = document.getElementById('statusText');
-           statusText.innerText = "✅ ท่านได้ลงทะเบียนผูกบัญชีไปแล้ว";
-           statusText.style.color = "#06C755";
+           
+           // 👉 [ปรับแก้] เช็คสถานะเพื่อแสดงข้อความที่ต่างกัน
+           if (data.status === 'Approved') {
+             statusText.innerText = "✅ ท่านได้ลงทะเบียนผูกบัญชีเรียบร้อยแล้ว";
+             statusText.style.color = "#06C755";
+           } else {
+             statusText.innerText = "⏳ บัญชีของท่านอยู่ระหว่างรอแอดมินอนุมัติ";
+             statusText.style.color = "#ff9900"; // สีส้มแจ้งให้รอ
+           }
+           
            statusText.style.fontSize = "18px";
-           printLog("=> พบประวัติ: ท่านเคยลงทะเบียนแล้ว");
+           printLog("=> พบประวัติ: ท่านเคยลงทะเบียนแล้ว (Status: " + data.status + ")");
        } else {
            document.getElementById('statusText').innerText = ""; 
            document.getElementById('submitBtn_tu').disabled = false; 
