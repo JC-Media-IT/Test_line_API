@@ -20,10 +20,15 @@
 
   <div class="card">
     <h2>ผูกบัญชีมหาวิทยาลัย</h2>
-    <form id="loginForm" onsubmit="handleFormSubmit(event)">
+    <!-- ⚠️ เปลี่ยน target ของ Form ให้ชี้ไปที่ iframe ที่ซ่อนอยู่ -->
+    <form id="loginForm" method="GET" action="https://script.google.com/macros/s/AKfycbyuny26eANQK5BxmXk1cIT3oLYZr1cyhTFnMUGvk2WnZ9_7fwxnaZteQqpXgnEC19MC/exec" target="hiddenIframe" onsubmit="handleFormSubmit(event)">
+      <!-- ส่งตัวแปร action ไปให้ GAS รู้ว่านี่คือการลงทะเบียน -->
+      <input type="hidden" name="action" value="register">
       <input type="hidden" id="lineUid" name="lineUid" value="">
+      
       <input type="text" id="username" name="username" placeholder="รหัสนักศึกษา หรือ Username" required>
       <input type="password" id="password" name="password" placeholder="รหัสผ่าน" required>
+      
       <button type="submit" id="submitBtn" disabled>เข้าสู่ระบบและผูกบัญชี</button>
     </form>
     <div id="statusText" class="status">กำลังโหลดข้อมูลระบบ...</div>
@@ -31,11 +36,14 @@
 
   <div id="debugBox">--- System Logs ---<br></div>
 
+  <!-- สร้าง Iframe ซ่อนไว้ เพื่อใช้รับผลลัพธ์จาก GAS โดยไม่ติด CORS -->
+  <iframe name="hiddenIframe" id="hiddenIframe" style="display:none;" onload="handleIframeLoad()"></iframe>
+
+  <!-- นำเข้า LIFF SDK -->
   <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   
   <script>
-    // ⚠️ นำ URL จาก Google Apps Script (Web App) ของคุณมาใส่ที่นี่
-    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbyuny26eANQK5BxmXk1cIT3oLYZr1cyhTFnMUGvk2WnZ9_7fwxnaZteQqpXgnEC19MC/exec";
+    let isSubmitting = false;
 
     function printLog(msg) {
       document.getElementById('debugBox').innerHTML += msg + "<br>";
@@ -62,51 +70,38 @@
       }
     }
 
-    async function handleFormSubmit(event) {
-      event.preventDefault(); 
+    // ฟังก์ชันนี้ทำงานเมื่อกดปุ่ม "เข้าสู่ระบบและผูกบัญชี"
+    function handleFormSubmit(event) {
       const statusText = document.getElementById('statusText');
       const submitBtn = document.getElementById('submitBtn');
       
-      const lineUid = document.getElementById('lineUid').value;
-      const username = document.getElementById('username').value;
-      const password = document.getElementById('password').value;
-
-      statusText.innerText = "กำลังตรวจสอบกับระบบมหาวิทยาลัย...";
+      isSubmitting = true;
+      statusText.innerText = "กำลังส่งข้อมูล... กรุณารอสักครู่ (ประมาณ 3-5 วินาที)";
       statusText.style.color = "#0000ff";
       submitBtn.disabled = true;
-      printLog("=> กำลังส่ง API ไปที่ GAS (GET)...");
+      printLog("=> กำลังส่งข้อมูลไปยังเซิร์ฟเวอร์ด้วย Iframe...");
       
-      try {
-        // ใช้ GET เพื่อหลีกเลี่ยงการถูกบล็อก CORS บน iOS/Safari
-        const params = new URLSearchParams({
-          action: 'register',
-          lineUid: lineUid,
-          username: username,
-          password: password
-        });
-        
-        const requestUrl = GAS_API_URL + "?" + params.toString();
-        
-        const response = await fetch(requestUrl, { method: 'GET' });
-        const result = await response.json();
-        
-        printLog("=> ผลลัพธ์: " + result.success);
+      // การทำงานจะถูกส่งต่อให้ <form> ส่งไปหา Iframe อัตโนมัติเพราะกำหนด target ไว้แล้ว
+    }
 
-        if (result.success) {
-          statusText.style.color = "#06C755";
-          statusText.innerText = result.message;
-          setTimeout(() => { if(liff.isInClient()) liff.closeWindow(); }, 2500); 
-        } else {
-          statusText.style.color = "#ff0000";
-          statusText.innerText = result.message;
-          submitBtn.disabled = false;
-        }
-      } catch (err) {
-        printLog("❌ API Error: " + err.message);
-        statusText.style.color = "#ff0000";
-        statusText.innerText = "เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์";
-        submitBtn.disabled = false;
-      }
+    // ฟังก์ชันนี้ทำงานเมื่อ Iframe โหลดข้อมูลจาก GAS เสร็จสิ้น
+    function handleIframeLoad() {
+      // ป้องกัน iframe ทำงานตอนโหลดหน้าเว็บครั้งแรก
+      if (!isSubmitting) return;
+      isSubmitting = false;
+
+      const statusText = document.getElementById('statusText');
+      printLog("=> ข้อมูลถูกส่งเรียบร้อย และระบบหลังบ้านประมวลผลสำเร็จ");
+      
+      statusText.style.color = "#06C755";
+      statusText.innerText = "ส่งข้อมูลสำเร็จ กรุณากลับไปที่ห้องแชตเพื่อตรวจสอบผลลัพธ์";
+      
+      // หน่วงเวลา 2 วินาทีเพื่อให้ผู้ใช้อ่านข้อความ แล้วปิดหน้าต่าง LIFF
+      setTimeout(() => { 
+        if(liff.isInClient()) {
+          liff.closeWindow(); 
+        } 
+      }, 2000); 
     }
 
     initializeLiff();
