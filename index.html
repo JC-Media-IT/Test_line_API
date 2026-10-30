@@ -14,32 +14,49 @@
     button:disabled { background-color: #ccc; cursor: not-allowed; }
     .status { margin-top: 15px; font-size: 14px; color: #ff0000; font-weight: bold; }
     #debugBox { width: 90%; max-width: 400px; background: #111; color: #0f0; font-family: monospace; font-size: 12px; padding: 10px; margin-top: 20px; border-radius: 8px; text-align: left; overflow-y: auto; max-height: 150px; word-wrap: break-word; }
+    
+    /* สไตล์เพิ่มเติมสำหรับลิงก์สลับฟอร์ม */
+    .toggle-link { display: block; margin-top: 20px; font-size: 14px; color: #0066cc; text-decoration: underline; cursor: pointer; }
+    .toggle-link:hover { color: #004499; }
+    #externalForm { display: none; } /* ซ่อนฟอร์มบุคคลภายนอกไว้ตอนแรก */
   </style>
 </head>
 <body>
 
   <div class="card">
-    <h2>ผูกบัญชีคณะสารสารศาสตร์และสื่อสารมวลชน มหาวิทยาลัยธรรมศาสตร์</h2>
-    <!-- ⚠️ เปลี่ยน target ของ Form ให้ชี้ไปที่ iframe ที่ซ่อนอยู่ -->
-    <form id="loginForm" method="GET" action="https://script.google.com/macros/s/AKfycbyuny26eANQK5BxmXk1cIT3oLYZr1cyhTFnMUGvk2WnZ9_7fwxnaZteQqpXgnEC19MC/exec" target="hiddenIframe" onsubmit="handleFormSubmit(event)">
-      <!-- ส่งตัวแปร action ไปให้ GAS รู้ว่านี่คือการลงทะเบียน -->
+    <h2>ผูกบัญชีคณะวารสารศาสตร์และสื่อสารมวลชน มหาวิทยาลัยธรรมศาสตร์</h2>
+    
+    <!-- ฟอร์มสำหรับบุคลากร/นักศึกษา มธ. -->
+    <form id="loginForm" method="GET" action="https://script.google.com/macros/s/AKfycbyuny26eANQK5BxmXk1cIT3oLYZr1cyhTFnMUGvk2WnZ9_7fwxnaZteQqpXgnEC19MC/exec" target="hiddenIframe" onsubmit="handleFormSubmit(event, 'loginForm')">
       <input type="hidden" name="action" value="register">
-      <input type="hidden" id="lineUid" name="lineUid" value="">
-      
+      <input type="hidden" id="lineUid_tu" name="lineUid" value="">
       <input type="text" id="username" name="username" placeholder="รหัสนักศึกษา หรือ Username" required>
       <input type="password" id="password" name="password" placeholder="รหัสผ่าน" required>
+      <button type="submit" id="submitBtn_tu" disabled>เข้าสู่ระบบและผูกบัญชี</button>
       
-      <button type="submit" id="submitBtn" disabled>เข้าสู่ระบบและผูกบัญชี</button>
+      <a class="toggle-link" onclick="toggleForm('external')">สำหรับบุคลากรภายนอก มธ. กรุณาคลิกที่นี่</a>
     </form>
+
+    <!-- ฟอร์มสำหรับบุคลากรภายนอก -->
+    <form id="externalForm" method="GET" action="https://script.google.com/macros/s/AKfycbyuny26eANQK5BxmXk1cIT3oLYZr1cyhTFnMUGvk2WnZ9_7fwxnaZteQqpXgnEC19MC/exec" target="hiddenIframe" onsubmit="handleFormSubmit(event, 'externalForm')">
+      <input type="hidden" name="action" value="register_external">
+      <input type="hidden" id="lineUid_ext" name="lineUid" value="">
+      <input type="text" name="fullname" placeholder="ชื่อ-นามสกุล" required>
+      <input type="tel" name="phone" placeholder="เบอร์โทรศัพท์" required>
+      <input type="email" name="email" placeholder="อีเมล (Email)" required>
+      <input type="text" name="workplace" placeholder="สถานที่ทำงาน / หน่วยงาน" required>
+      <button type="submit" id="submitBtn_ext" disabled>ลงทะเบียนบุคลากรภายนอก</button>
+      
+      <a class="toggle-link" onclick="toggleForm('tu')">กลับไปหน้าเข้าสู่ระบบสำหรับ มธ.</a>
+    </form>
+
     <div id="statusText" class="status">กำลังโหลดข้อมูลระบบ...</div>
   </div>
 
   <div id="debugBox">--- System Logs ---<br></div>
 
-  <!-- สร้าง Iframe ซ่อนไว้ เพื่อใช้รับผลลัพธ์จาก GAS โดยไม่ติด CORS -->
   <iframe name="hiddenIframe" id="hiddenIframe" style="display:none;" onload="handleIframeLoad()"></iframe>
 
-  <!-- นำเข้า LIFF SDK -->
   <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   
   <script>
@@ -48,6 +65,17 @@
 
     function printLog(msg) {
       document.getElementById('debugBox').innerHTML += msg + "<br>";
+    }
+
+    // ฟังก์ชันสลับหน้าต่างฟอร์ม
+    function toggleForm(type) {
+      if (type === 'external') {
+        document.getElementById('loginForm').style.display = 'none';
+        document.getElementById('externalForm').style.display = 'block';
+      } else {
+        document.getElementById('loginForm').style.display = 'block';
+        document.getElementById('externalForm').style.display = 'none';
+      }
     }
 
     async function initializeLiff() {
@@ -60,9 +88,9 @@
           const profile = await liff.getProfile();
           printLog("3. LINE ID: " + profile.userId);
           
-          document.getElementById('lineUid').value = profile.userId;
+          document.getElementById('lineUid_tu').value = profile.userId;
+          document.getElementById('lineUid_ext').value = profile.userId;
           
-          // 👉 [เพิ่มใหม่] ส่งตรวจสอบประวัติการลงทะเบียน
           printLog("=> กำลังตรวจสอบประวัติการลงทะเบียน...");
           checkUserRegistration(profile.userId);
 
@@ -74,44 +102,45 @@
       }
     }
 
-    // 👉 [เพิ่มใหม่] ฟังก์ชันดึงข้อมูลจาก GAS ผ่านแท็ก <script> (JSONP) เพื่อหลีกเลี่ยง CORS บน iOS
     function checkUserRegistration(uid) {
        const script = document.createElement('script');
        script.src = GAS_API_URL + "?action=check&lineUid=" + uid + "&callback=handleCheckResult";
        document.body.appendChild(script);
     }
 
-    // 👉 [เพิ่มใหม่] ฟังก์ชันรับผลลัพธ์จาก GAS
     function handleCheckResult(data) {
        if (data.registered) {
-           // ถ้าเคยลงทะเบียนแล้ว ให้ซ่อนฟอร์มและแสดงข้อความ
            document.getElementById('loginForm').style.display = "none";
+           document.getElementById('externalForm').style.display = "none";
            const statusText = document.getElementById('statusText');
            statusText.innerText = "✅ ท่านได้ลงทะเบียนผูกบัญชีไปแล้ว";
            statusText.style.color = "#06C755";
            statusText.style.fontSize = "18px";
            printLog("=> พบประวัติ: ท่านเคยลงทะเบียนแล้ว");
        } else {
-           // ถ้ายังไม่เคยลงทะเบียน ให้เปิดปุ่มให้กดได้
            document.getElementById('statusText').innerText = ""; 
-           document.getElementById('submitBtn').disabled = false; 
+           document.getElementById('submitBtn_tu').disabled = false; 
+           document.getElementById('submitBtn_ext').disabled = false; 
            printLog("=> ยังไม่เคยลงทะเบียน (อนุญาตให้กรอกได้)");
        }
     }
 
-    // ฟังก์ชันทำงานเมื่อกดปุ่ม "เข้าสู่ระบบและผูกบัญชี"
-    function handleFormSubmit(event) {
+    function handleFormSubmit(event, formId) {
       const statusText = document.getElementById('statusText');
-      const submitBtn = document.getElementById('submitBtn');
+      const submitBtn = formId === 'loginForm' ? document.getElementById('submitBtn_tu') : document.getElementById('submitBtn_ext');
       
       isSubmitting = true;
       statusText.innerText = "กำลังส่งข้อมูล... กรุณารอสักครู่ (ประมาณ 3-5 วินาที)";
       statusText.style.color = "#0000ff";
       submitBtn.disabled = true;
+      
+      // ปิดปุ่มสลับฟอร์มชั่วคราวเพื่อป้องกันการกดเล่นระหว่างโหลด
+      const links = document.getElementsByClassName('toggle-link');
+      for(let i=0; i<links.length; i++) { links[i].style.display = 'none'; }
+      
       printLog("=> กำลังส่งข้อมูลไปยังเซิร์ฟเวอร์...");
     }
 
-    // ฟังก์ชันทำงานเมื่อ Iframe โหลดเสร็จสิ้น (หลังผู้ใช้กด Submit)
     function handleIframeLoad() {
       if (!isSubmitting) return;
       isSubmitting = false;
@@ -119,12 +148,12 @@
       const statusText = document.getElementById('statusText');
       printLog("=> ระบบประมวลผลสำเร็จ");
       
-      // เมื่อส่งสำเร็จ ให้ซ่อนฟอร์มไปเลย
       document.getElementById('loginForm').style.display = "none";
+      document.getElementById('externalForm').style.display = "none";
       
       statusText.style.color = "#06C755";
       statusText.style.fontSize = "16px";
-      statusText.innerText = "✅ ผูกบัญชีสำเร็จ! กรุณากลับไปที่ห้องแชตเพื่อตรวจสอบผลลัพธ์";
+      statusText.innerText = "✅ ลงทะเบียนสำเร็จ! กรุณากลับไปที่ห้องแชตเพื่อตรวจสอบผลลัพธ์";
       
       setTimeout(() => { 
         if(liff.isInClient()) {
