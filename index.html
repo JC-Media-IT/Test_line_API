@@ -31,7 +31,6 @@
 
   <div id="debugBox">--- System Logs ---<br></div>
 
-  <!-- เปลี่ยนเฉพาะส่วน <script> ด้านล่างสุดของไฟล์ Index.html -->
   <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   
   <script>
@@ -45,7 +44,6 @@
     async function initializeLiff() {
       printLog("1. กำลังโหลด LIFF SDK...");
       try {
-        // เมื่อไม่ได้อยู่บน GAS แล้ว liff.init จะทำงานบน iOS ได้อย่างราบรื่น
         await liff.init({ liffId: "2012279055-k6VHlNqv" });
         printLog("2. LIFF init สำเร็จ");
 
@@ -69,27 +67,29 @@
       const statusText = document.getElementById('statusText');
       const submitBtn = document.getElementById('submitBtn');
       
-      const payload = {
-        action: 'register',
-        lineUid: document.getElementById('lineUid').value,
-        username: document.getElementById('username').value,
-        password: document.getElementById('password').value
-      };
+      const lineUid = document.getElementById('lineUid').value;
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
 
       statusText.innerText = "กำลังตรวจสอบกับระบบมหาวิทยาลัย...";
       statusText.style.color = "#0000ff";
       submitBtn.disabled = true;
-      printLog("=> กำลังส่ง API ไปที่ GAS...");
+      printLog("=> กำลังส่ง API ไปที่ GAS (GET)...");
       
       try {
-        // ใช้ text/plain เพื่อหลีกเลี่ยงปัญหา CORS Preflight ใน GAS
-        const response = await fetch(GAS_API_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify(payload)
+        // ใช้ GET เพื่อหลีกเลี่ยงการถูกบล็อก CORS บน iOS/Safari
+        const params = new URLSearchParams({
+          action: 'register',
+          lineUid: lineUid,
+          username: username,
+          password: password
         });
         
+        const requestUrl = GAS_API_URL + "?" + params.toString();
+        
+        const response = await fetch(requestUrl, { method: 'GET' });
         const result = await response.json();
+        
         printLog("=> ผลลัพธ์: " + result.success);
 
         if (result.success) {
@@ -104,7 +104,7 @@
       } catch (err) {
         printLog("❌ API Error: " + err.message);
         statusText.style.color = "#ff0000";
-        statusText.innerText = "เกิดข้อผิดพลาดในการเชื่อมต่อเครือข่าย";
+        statusText.innerText = "เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์";
         submitBtn.disabled = false;
       }
     }
