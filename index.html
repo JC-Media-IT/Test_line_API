@@ -108,13 +108,16 @@
            document.getElementById('externalForm').style.display = "none";
            const statusText = document.getElementById('statusText');
            
-           // 👉 [ปรับแก้] เช็คสถานะเพื่อแสดงข้อความที่ต่างกัน
+           // 👉 [เพิ่มเงื่อนไข Rejected]
            if (data.status === 'Approved') {
              statusText.innerText = "✅ ท่านได้ลงทะเบียนผูกบัญชีเรียบร้อยแล้ว";
              statusText.style.color = "#06C755";
+           } else if (data.status === 'Rejected') {
+             statusText.innerText = "❌ คำขอลงทะเบียนของท่านถูกปฏิเสธ";
+             statusText.style.color = "#ff3333"; // สีแดง
            } else {
              statusText.innerText = "⏳ บัญชีของท่านอยู่ระหว่างรอแอดมินอนุมัติ";
-             statusText.style.color = "#ff9900"; // สีส้มแจ้งให้รอ
+             statusText.style.color = "#ff9900"; // สีส้ม
            }
            
            statusText.style.fontSize = "18px";
