@@ -38,7 +38,7 @@
     <form id="externalForm" onsubmit="handleFormSubmit(event, 'externalForm')">
       <input type="hidden" id="lineUid_ext" name="lineUid" value="">
       <input type="text" id="ext_fullname" placeholder="ชื่อ-นามสกุล" required>
-      <input type="tel" id="ext_phone" placeholder="เบอร์โทรศัพท์" required>
+      <input type="tel" id="ext_phone" placeholder="เบอร์โทรศัพท์ (10 หลัก)" pattern="0[0-9]{9}" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '');" required>
       <input type="email" id="ext_email" placeholder="อีเมล (Email)" required>
       <input type="text" id="ext_workplace" placeholder="สถานที่ทำงาน / หน่วยงาน" required>
       <button type="submit" id="submitBtn_ext" disabled>ลงทะเบียนบุคลากรภายนอก</button>
