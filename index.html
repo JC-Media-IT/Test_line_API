@@ -20,6 +20,7 @@
     .toggle-link { display: block; margin-top: 20px; font-size: 14px; color: #0066cc; text-decoration: underline; cursor: pointer; }
     .toggle-link:hover { color: #004499; }
     #externalForm { display: none; }
+    #debugBox { display: none; width: 90%; max-width: 400px; background: #111; color: #0f0; font-family: monospace; font-size: 12px; padding: 10px; margin-top: 20px; border-radius: 8px; text-align: left; overflow-y: auto; max-height: 150px; word-wrap: break-word; }
   </style>
 </head>
 <body>
@@ -62,7 +63,7 @@
     <div id="statusText" class="status">กำลังโหลดข้อมูลระบบ...</div>
   </div>
 
-  <div id="debugBox">--- System Logs ---<br></div>
+  <div id="debugBox" style="display: none;">--- System Logs ---<br></div>
 
   <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   
