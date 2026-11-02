@@ -8,11 +8,14 @@
   <style>
     body { font-family: 'Sarabun', sans-serif; background-color: #f5f5f5; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding-top: 20px; }
     .card { background-color: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 90%; max-width: 400px; text-align: center; }
+    .logo { width: 80px; margin-bottom: 15px; }
     h2 { color: #333; margin-bottom: 25px; font-size: 22px; }
     input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
     button { width: 100%; padding: 14px; background-color: #06C755; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; }
     button:disabled { background-color: #ccc; cursor: not-allowed; }
     .status { margin-top: 15px; font-size: 14px; color: #ff0000; font-weight: bold; }
+    .pdpa-link { display: block; font-size: 12px; margin-top: 12px; color: #555; }
+    .pdpa-link a { color: #0066cc; text-decoration: underline; }
     #debugBox { width: 90%; max-width: 400px; background: #111; color: #0f0; font-family: monospace; font-size: 12px; padding: 10px; margin-top: 20px; border-radius: 8px; text-align: left; overflow-y: auto; max-height: 150px; word-wrap: break-word; }
     .toggle-link { display: block; margin-top: 20px; font-size: 14px; color: #0066cc; text-decoration: underline; cursor: pointer; }
     .toggle-link:hover { color: #004499; }
@@ -22,14 +25,19 @@
 <body>
 
   <div class="card">
+    <img src="https://quota.jc.tu.ac.th/images/jc_logo.png" alt="JC Logo" class="logo">
     <h2>ผูกบัญชีคณะวารสารศาสตร์ฯ มหาวิทยาลัยธรรมศาสตร์</h2>
     
-    <!-- ฟอร์มสำหรับบุคลากร/นักศึกษา มธ. (ส่งด้วย JS POST ซ่อนรหัสผ่าน) -->
+    <!-- ฟอร์มสำหรับบุคลากร/นักศึกษา มธ. -->
     <form id="loginForm" onsubmit="handleFormSubmit(event, 'loginForm')">
       <input type="hidden" id="lineUid_tu" name="lineUid" value="">
       <input type="text" id="username" name="username" placeholder="รหัสนักศึกษา หรือ Username" required>
       <input type="password" id="password" name="password" placeholder="รหัสผ่าน" required>
       <button type="submit" id="submitBtn_tu" disabled>เข้าสู่ระบบและผูกบัญชี</button>
+      
+      <div class="pdpa-link">
+        ดำเนินการต่อแสดงว่ายอมรับ <a href="https://jc.tu.ac.th/th/pdpa" target="_blank">นโยบายคุ้มครองข้อมูลส่วนบุคคล</a>
+      </div>
       
       <a class="toggle-link" onclick="toggleForm('external')">สำหรับบุคลากรภายนอก มธ. กรุณาคลิกที่นี่</a>
     </form>
@@ -37,11 +45,16 @@
     <!-- ฟอร์มสำหรับบุคลากรภายนอก -->
     <form id="externalForm" onsubmit="handleFormSubmit(event, 'externalForm')">
       <input type="hidden" id="lineUid_ext" name="lineUid" value="">
+      <input type="text" id="ext_idcard" placeholder="รหัสบัตรประชาชน (10 หลัก)" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '');" required>
       <input type="text" id="ext_fullname" placeholder="ชื่อ-นามสกุล" required>
       <input type="tel" id="ext_phone" placeholder="เบอร์โทรศัพท์ (10 หลัก)" pattern="0[0-9]{9}" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '');" required>
       <input type="email" id="ext_email" placeholder="อีเมล (Email)" required>
       <input type="text" id="ext_workplace" placeholder="สถานที่ทำงาน / หน่วยงาน" required>
       <button type="submit" id="submitBtn_ext" disabled>ลงทะเบียนบุคลากรภายนอก</button>
+      
+      <div class="pdpa-link">
+        ดำเนินการต่อแสดงว่ายอมรับ <a href="https://jc.tu.ac.th/th/pdpa" target="_blank">นโยบายคุ้มครองข้อมูลส่วนบุคคล</a>
+      </div>
       
       <a class="toggle-link" onclick="toggleForm('tu')">กลับไปหน้าเข้าสู่ระบบสำหรับ มธ.</a>
     </form>
@@ -54,12 +67,9 @@
   <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   
   <script>
-    // ⚠️ ลิงก์ API GAS ของคุณ
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbyuny26eANQK5BxmXk1cIT3oLYZr1cyhTFnMUGvk2WnZ9_7fwxnaZteQqpXgnEC19MC/exec";
 
-    function printLog(msg) {
-      document.getElementById('debugBox').innerHTML += msg + "<br>";
-    }
+    function printLog(msg) { document.getElementById('debugBox').innerHTML += msg + "<br>"; }
 
     function toggleForm(type) {
       if (type === 'external') {
@@ -85,9 +95,7 @@
           document.getElementById('lineUid_ext').value = profile.userId;
           
           printLog("=> กำลังตรวจสอบประวัติการลงทะเบียน...");
-          // เช็คประวัติยังใช้เทคนิค JSONP (GET) อยู่เพื่อให้ผ่าน CORS ของ Safari
           checkUserRegistration(profile.userId);
-
         } else {
           printLog("3. ไม่ได้เปิดผ่านแอป LINE");
         }
@@ -108,16 +116,15 @@
            document.getElementById('externalForm').style.display = "none";
            const statusText = document.getElementById('statusText');
            
-           // 👉 [เพิ่มเงื่อนไข Rejected]
            if (data.status === 'Approved') {
              statusText.innerText = "✅ ท่านได้ลงทะเบียนผูกบัญชีเรียบร้อยแล้ว";
              statusText.style.color = "#06C755";
            } else if (data.status === 'Rejected') {
              statusText.innerText = "❌ คำขอลงทะเบียนของท่านถูกปฏิเสธ";
-             statusText.style.color = "#ff3333"; // สีแดง
+             statusText.style.color = "#ff3333";
            } else {
              statusText.innerText = "⏳ บัญชีของท่านอยู่ระหว่างรอแอดมินอนุมัติ";
-             statusText.style.color = "#ff9900"; // สีส้ม
+             statusText.style.color = "#ff9900";
            }
            
            statusText.style.fontSize = "18px";
@@ -130,24 +137,21 @@
        }
     }
 
-    // ฟังก์ชันรวบการส่งด้วย POST
     async function handleFormSubmit(event, formId) {
       event.preventDefault(); 
       
       const statusText = document.getElementById('statusText');
       const submitBtn = formId === 'loginForm' ? document.getElementById('submitBtn_tu') : document.getElementById('submitBtn_ext');
       
-      statusText.innerText = "กำลังตรวจสอบกับระบบมหาวิทยาลัย...";
+      statusText.innerText = "กำลังตรวจสอบกับระบบ...";
       statusText.style.color = "#0000ff";
       submitBtn.disabled = true;
       
-      // ปิดปุ่มสลับฟอร์มชั่วคราว
       const links = document.getElementsByClassName('toggle-link');
       for(let i=0; i<links.length; i++) { links[i].style.display = 'none'; }
       
       printLog("=> กำลังส่งข้อมูลแบบ POST...");
 
-      // จัดเตรียมข้อมูลที่จะส่ง (Payload)
       let payload = {};
       if (formId === 'loginForm') {
         payload = {
@@ -160,6 +164,177 @@
         payload = {
           action: 'register_external',
           lineUid: document.getElementById('lineUid_ext').value,
+          idcard: document.getElementById('ext_idcard').value,
+          fullname: document.getElementById('ext_fullname').value,
+          phone: document.getElementById('ext_phone').value,
+          email: document.getElementById('ext_email').value,
+          workplace: document.getElementById('ext_workplace').value<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>ลงทะเบียนผูกบัญชี</title>
+  <style>
+    body { font-family: 'Sarabun', sans-serif; background-color: #f5f5f5; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding-top: 20px; }
+    .card { background-color: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 90%; max-width: 400px; text-align: center; }
+    .logo { width: 80px; margin-bottom: 15px; }
+    h2 { color: #333; margin-bottom: 25px; font-size: 22px; }
+    input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+    button { width: 100%; padding: 14px; background-color: #06C755; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; }
+    button:disabled { background-color: #ccc; cursor: not-allowed; }
+    .status { margin-top: 15px; font-size: 14px; color: #ff0000; font-weight: bold; }
+    .pdpa-link { display: block; font-size: 12px; margin-top: 12px; color: #555; }
+    .pdpa-link a { color: #0066cc; text-decoration: underline; }
+    #debugBox { width: 90%; max-width: 400px; background: #111; color: #0f0; font-family: monospace; font-size: 12px; padding: 10px; margin-top: 20px; border-radius: 8px; text-align: left; overflow-y: auto; max-height: 150px; word-wrap: break-word; }
+    .toggle-link { display: block; margin-top: 20px; font-size: 14px; color: #0066cc; text-decoration: underline; cursor: pointer; }
+    .toggle-link:hover { color: #004499; }
+    #externalForm { display: none; }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <img src="https://quota.jc.tu.ac.th/images/jc_logo.png" alt="JC Logo" class="logo">
+    <h2>ผูกบัญชีคณะวารสารศาสตร์ฯ มหาวิทยาลัยธรรมศาสตร์</h2>
+    
+    <!-- ฟอร์มสำหรับบุคลากร/นักศึกษา มธ. -->
+    <form id="loginForm" onsubmit="handleFormSubmit(event, 'loginForm')">
+      <input type="hidden" id="lineUid_tu" name="lineUid" value="">
+      <input type="text" id="username" name="username" placeholder="รหัสนักศึกษา หรือ Username" required>
+      <input type="password" id="password" name="password" placeholder="รหัสผ่าน" required>
+      <button type="submit" id="submitBtn_tu" disabled>เข้าสู่ระบบและผูกบัญชี</button>
+      
+      <div class="pdpa-link">
+        ดำเนินการต่อแสดงว่ายอมรับ <a href="https://jc.tu.ac.th/th/pdpa" target="_blank">นโยบายคุ้มครองข้อมูลส่วนบุคคล</a>
+      </div>
+      
+      <a class="toggle-link" onclick="toggleForm('external')">สำหรับบุคลากรภายนอก มธ. กรุณาคลิกที่นี่</a>
+    </form>
+
+    <!-- ฟอร์มสำหรับบุคลากรภายนอก -->
+    <form id="externalForm" onsubmit="handleFormSubmit(event, 'externalForm')">
+      <input type="hidden" id="lineUid_ext" name="lineUid" value="">
+      <input type="text" id="ext_idcard" placeholder="รหัสบัตรประชาชน (10 หลัก)" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '');" required>
+      <input type="text" id="ext_fullname" placeholder="ชื่อ-นามสกุล" required>
+      <input type="tel" id="ext_phone" placeholder="เบอร์โทรศัพท์ (10 หลัก)" pattern="0[0-9]{9}" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '');" required>
+      <input type="email" id="ext_email" placeholder="อีเมล (Email)" required>
+      <input type="text" id="ext_workplace" placeholder="สถานที่ทำงาน / หน่วยงาน" required>
+      <button type="submit" id="submitBtn_ext" disabled>ลงทะเบียนบุคลากรภายนอก</button>
+      
+      <div class="pdpa-link">
+        ดำเนินการต่อแสดงว่ายอมรับ <a href="https://jc.tu.ac.th/th/pdpa" target="_blank">นโยบายคุ้มครองข้อมูลส่วนบุคคล</a>
+      </div>
+      
+      <a class="toggle-link" onclick="toggleForm('tu')">กลับไปหน้าเข้าสู่ระบบสำหรับ มธ.</a>
+    </form>
+
+    <div id="statusText" class="status">กำลังโหลดข้อมูลระบบ...</div>
+  </div>
+
+  <div id="debugBox">--- System Logs ---<br></div>
+
+  <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  
+  <script>
+    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbyuny26eANQK5BxmXk1cIT3oLYZr1cyhTFnMUGvk2WnZ9_7fwxnaZteQqpXgnEC19MC/exec";
+
+    function printLog(msg) { document.getElementById('debugBox').innerHTML += msg + "<br>"; }
+
+    function toggleForm(type) {
+      if (type === 'external') {
+        document.getElementById('loginForm').style.display = 'none';
+        document.getElementById('externalForm').style.display = 'block';
+      } else {
+        document.getElementById('loginForm').style.display = 'block';
+        document.getElementById('externalForm').style.display = 'none';
+      }
+    }
+
+    async function initializeLiff() {
+      printLog("1. กำลังโหลด LIFF SDK...");
+      try {
+        await liff.init({ liffId: "2012279055-k6VHlNqv" });
+        printLog("2. LIFF init สำเร็จ");
+
+        if (liff.isLoggedIn() || liff.isInClient()) {
+          const profile = await liff.getProfile();
+          printLog("3. LINE ID: " + profile.userId);
+          
+          document.getElementById('lineUid_tu').value = profile.userId;
+          document.getElementById('lineUid_ext').value = profile.userId;
+          
+          printLog("=> กำลังตรวจสอบประวัติการลงทะเบียน...");
+          checkUserRegistration(profile.userId);
+        } else {
+          printLog("3. ไม่ได้เปิดผ่านแอป LINE");
+        }
+      } catch (err) {
+        printLog("❌ Error: " + err.message);
+      }
+    }
+
+    function checkUserRegistration(uid) {
+       const script = document.createElement('script');
+       script.src = GAS_API_URL + "?action=check&lineUid=" + uid + "&callback=handleCheckResult";
+       document.body.appendChild(script);
+    }
+
+    function handleCheckResult(data) {
+       if (data.registered) {
+           document.getElementById('loginForm').style.display = "none";
+           document.getElementById('externalForm').style.display = "none";
+           const statusText = document.getElementById('statusText');
+           
+           if (data.status === 'Approved') {
+             statusText.innerText = "✅ ท่านได้ลงทะเบียนผูกบัญชีเรียบร้อยแล้ว";
+             statusText.style.color = "#06C755";
+           } else if (data.status === 'Rejected') {
+             statusText.innerText = "❌ คำขอลงทะเบียนของท่านถูกปฏิเสธ";
+             statusText.style.color = "#ff3333";
+           } else {
+             statusText.innerText = "⏳ บัญชีของท่านอยู่ระหว่างรอแอดมินอนุมัติ";
+             statusText.style.color = "#ff9900";
+           }
+           
+           statusText.style.fontSize = "18px";
+           printLog("=> พบประวัติ: ท่านเคยลงทะเบียนแล้ว (Status: " + data.status + ")");
+       } else {
+           document.getElementById('statusText').innerText = ""; 
+           document.getElementById('submitBtn_tu').disabled = false; 
+           document.getElementById('submitBtn_ext').disabled = false; 
+           printLog("=> ยังไม่เคยลงทะเบียน (อนุญาตให้กรอกได้)");
+       }
+    }
+
+    async function handleFormSubmit(event, formId) {
+      event.preventDefault(); 
+      
+      const statusText = document.getElementById('statusText');
+      const submitBtn = formId === 'loginForm' ? document.getElementById('submitBtn_tu') : document.getElementById('submitBtn_ext');
+      
+      statusText.innerText = "กำลังตรวจสอบกับระบบ...";
+      statusText.style.color = "#0000ff";
+      submitBtn.disabled = true;
+      
+      const links = document.getElementsByClassName('toggle-link');
+      for(let i=0; i<links.length; i++) { links[i].style.display = 'none'; }
+      
+      printLog("=> กำลังส่งข้อมูลแบบ POST...");
+
+      let payload = {};
+      if (formId === 'loginForm') {
+        payload = {
+          action: 'register',
+          lineUid: document.getElementById('lineUid_tu').value,
+          username: document.getElementById('username').value,
+          password: document.getElementById('password').value
+        };
+      } else {
+        payload = {
+          action: 'register_external',
+          lineUid: document.getElementById('lineUid_ext').value,
+          idcard: document.getElementById('ext_idcard').value,
           fullname: document.getElementById('ext_fullname').value,
           phone: document.getElementById('ext_phone').value,
           email: document.getElementById('ext_email').value,
@@ -168,7 +343,45 @@
       }
 
       try {
-        // ใช้ text/plain ส่งเพื่อผ่าน CORS Pre-flight ใน iOS/Safari
+        const response = await fetch(GAS_API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(payload)
+        });
+        
+        const result = await response.json();
+        printLog("=> ผลลัพธ์: " + result.success);
+
+        if (result.success) {
+          document.getElementById('loginForm').style.display = "none";
+          document.getElementById('externalForm').style.display = "none";
+          statusText.style.color = "#06C755";
+          statusText.style.fontSize = "16px";
+          statusText.innerText = result.message;
+          setTimeout(() => { if(liff.isInClient()) liff.closeWindow(); }, 2500); 
+        } else {
+          statusText.style.color = "#ff0000";
+          statusText.innerText = result.message;
+          submitBtn.disabled = false;
+          for(let i=0; i<links.length; i++) { links[i].style.display = 'block'; }
+        }
+      } catch (err) {
+        printLog("❌ API Error: " + err.message);
+        statusText.style.color = "#ff0000";
+        statusText.innerText = "เกิดข้อผิดพลาดในการเชื่อมต่อเครือข่าย กรุณาลองใหม่";
+        submitBtn.disabled = false;
+        for(let i=0; i<links.length; i++) { links[i].style.display = 'block'; }
+      }
+    }
+
+    initializeLiff();
+  </script>
+</body>
+</html
+ >       };
+      }
+
+      try {
         const response = await fetch(GAS_API_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
