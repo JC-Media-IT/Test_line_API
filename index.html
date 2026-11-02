@@ -144,8 +144,8 @@
       try {
         await liff.init({ liffId: "2012279055-k6VHlNqv" });
         printLog("2. LIFF init สำเร็จ");
-
-        if (liff.isLoggedIn() || liff.isInClient()) {
+        // 👉 [ปรับแก้] ตรวจสอบว่าเปิดผ่าน In-Client Browser ของแอป LINE หรือไม่
+        if (liff.isInClient()) {
           const profile = await liff.getProfile();
           printLog("3. LINE ID: " + profile.userId);
           
@@ -155,19 +155,54 @@
           printLog("=> กำลังตรวจสอบประวัติการลงทะเบียน...");
           checkUserRegistration(profile.userId);
         } else {
-          Swal.close(); // ปิด loading หากไม่ได้เปิดบน LINE
-          printLog("3. ไม่ได้เปิดผ่านแอป LINE");
+          // 👉 บล็อกผู้ใช้งานที่เปิดผ่าน External Browser (Chrome, Safari, PC)
+          document.getElementById('loginForm').style.display = "none";
+          document.getElementById('externalForm').style.display = "none";
+          
+          Swal.fire({
+            icon: 'error',
+            title: 'กรุณาเปิดผ่านแอป LINE',
+            text: 'ระบบนี้สงวนสิทธิ์ให้เข้าใช้งานผ่านทางแอปพลิเคชัน LINE เท่านั้น กรุณาสแกน QR Code หรือเปิดผ่านลิงก์ในแชต LINE',
+            allowOutsideClick: false,
+            showConfirmButton: false
+          });
+          
+          printLog("❌ บล็อกการเข้าถึง: เปิดผ่านโปรแกรมภายนอก (ไม่ได้เปิดในแอป LINE)");
         }
       } catch (err) {
         Swal.fire({
           icon: 'error',
           title: 'ข้อผิดพลาดระบบ',
-          text: 'ไม่สามารถโหลดระบบ LIFF ได้: ' + err.message,
+          text: 'ไม่สามารถเชื่อมต่อระบบ LIFF ได้: ' + err.message,
           confirmButtonColor: '#d33'
         });
         printLog("❌ Error: " + err.message);
       }
     }
+
+    //     if (liff.isLoggedIn() || liff.isInClient()) {
+    //       const profile = await liff.getProfile();
+    //       printLog("3. LINE ID: " + profile.userId);
+          
+    //       document.getElementById('lineUid_tu').value = profile.userId;
+    //       document.getElementById('lineUid_ext').value = profile.userId;
+          
+    //       printLog("=> กำลังตรวจสอบประวัติการลงทะเบียน...");
+    //       checkUserRegistration(profile.userId);
+    //     } else {
+    //       Swal.close(); // ปิด loading หากไม่ได้เปิดบน LINE
+    //       printLog("3. ไม่ได้เปิดผ่านแอป LINE");
+    //     }
+    //   } catch (err) {
+    //     Swal.fire({
+    //       icon: 'error',
+    //       title: 'ข้อผิดพลาดระบบ',
+    //       text: 'ไม่สามารถโหลดระบบ LIFF ได้: ' + err.message,
+    //       confirmButtonColor: '#d33'
+    //     });
+    //     printLog("❌ Error: " + err.message);
+    //   }
+    // }
 
     function checkUserRegistration(uid) {
        const script = document.createElement('script');
@@ -242,7 +277,7 @@
              Swal.fire({
                icon: 'warning',
                title: 'อยู่ระหว่างรอการอนุมัติ',
-               text: 'บัญชีของท่าน (บุคคลภายนอกคณะฯ) กำลังอยู่ระหว่างรอแอดมินตรวจสอบและอนุมัติ',
+               text: 'บัญชีของท่าน (บุคคลภายนอก) กำลังอยู่ระหว่างรอแอดมินตรวจสอบและอนุมัติ',
                confirmButtonColor: '#f39c12',
                confirmButtonText: 'รับทราบ'
              });
