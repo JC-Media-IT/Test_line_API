@@ -7,6 +7,8 @@
   <title>ลงทะเบียนผูกบัญชี</title>
   <!-- เพิ่ม Favicon ตรงนี้ -->
   <link rel="icon" type="image/png" href="https://quota.jc.tu.ac.th/images/jc_logo.png">
+  <!-- เพิ่ม SweetAlert2 CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
     body { font-family: 'Sarabun', sans-serif; background-color: #f5f5f5; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding-top: 20px; }
     .card { background-color: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 90%; max-width: 400px; text-align: center; }
@@ -27,6 +29,7 @@
     .form-group label { display: block; font-size: 14px; color: #444; font-weight: bold; margin-bottom: 8px; margin-left: 4px; }
     .form-group input { margin-bottom: 0; } /* ลบ margin เดิมของ input ออกเพื่อไม่ให้ห่างเกินไป */
     .guide-text { font-size: 12px; color: #666; text-align: left; margin: 6px 0 0 4px; line-height: 1.5; padding: 8px; background-color: #f9f9f9; border-left: 3px solid #06C755; border-radius: 4px; }
+    .status { display: none; }
   </style>
 </head>
 <body>
@@ -157,46 +160,153 @@
        document.body.appendChild(script);
     }
 
+    // function handleCheckResult(data) {
+    //    if (data.registered) {
+    //        document.getElementById('loginForm').style.display = "none";
+    //        document.getElementById('externalForm').style.display = "none";
+    //        const statusText = document.getElementById('statusText');
+           
+    //        if (data.status === 'Approved') {
+    //          statusText.innerText = "✅ ท่านได้ลงทะเบียนผูกบัญชีเรียบร้อยแล้ว";
+    //          statusText.style.color = "#06C755";
+    //        } else if (data.status === 'Rejected') {
+    //          statusText.innerText = "❌ คำขอลงทะเบียนของท่านถูกปฏิเสธ";
+    //          statusText.style.color = "#ff3333";
+    //        } else {
+    //          statusText.innerText = "⏳ บัญชีของท่านอยู่ระหว่างรอแอดมินอนุมัติ";
+    //          statusText.style.color = "#ff9900";
+    //        }
+           
+    //        statusText.style.fontSize = "18px";
+    //        printLog("=> พบประวัติ: ท่านเคยลงทะเบียนแล้ว (Status: " + data.status + ")");
+    //    } else {
+    //        document.getElementById('statusText').innerText = ""; 
+    //        document.getElementById('submitBtn_tu').disabled = false; 
+    //        document.getElementById('submitBtn_ext').disabled = false; 
+    //        printLog("=> ยังไม่เคยลงทะเบียน (อนุญาตให้กรอกได้)");
+    //    }
+    // }
+    // 👉 [ปรับแก้] แจ้งเตือนสถานะเดิมของผู้ใช้ด้วย Swal.fire
     function handleCheckResult(data) {
        if (data.registered) {
            document.getElementById('loginForm').style.display = "none";
            document.getElementById('externalForm').style.display = "none";
-           const statusText = document.getElementById('statusText');
            
            if (data.status === 'Approved') {
-             statusText.innerText = "✅ ท่านได้ลงทะเบียนผูกบัญชีเรียบร้อยแล้ว";
-             statusText.style.color = "#06C755";
+             Swal.fire({
+               icon: 'success',
+               title: 'ลงทะเบียนแล้ว',
+               text: 'ท่านได้ลงทะเบียนผูกบัญชีเรียบร้อยแล้ว สามารถใช้งานแชตได้ทันที',
+               confirmButtonColor: '#06C755'
+             });
            } else if (data.status === 'Rejected') {
-             statusText.innerText = "❌ คำขอลงทะเบียนของท่านถูกปฏิเสธ";
-             statusText.style.color = "#ff3333";
+             Swal.fire({
+               icon: 'error',
+               title: 'ถูกปฏิเสธการเข้าใช้งาน',
+               text: 'คำขอลงทะเบียนของท่านถูกปฏิเสธการเข้าใช้งาน โปรดติดต่อแอดมิน',
+               confirmButtonColor: '#d33'
+             });
            } else {
-             statusText.innerText = "⏳ บัญชีของท่านอยู่ระหว่างรอแอดมินอนุมัติ";
-             statusText.style.color = "#ff9900";
+             Swal.fire({
+               icon: 'warning',
+               title: 'อยู่ระหว่างรอการอนุมัติ',
+               text: 'บัญชีของท่าน (บุคคลภายนอก) กำลังอยู่ระหว่างรอแอดมินตรวจสอบและอนุมัติ',
+               confirmButtonColor: '#f39c12'
+             });
            }
            
-           statusText.style.fontSize = "18px";
            printLog("=> พบประวัติ: ท่านเคยลงทะเบียนแล้ว (Status: " + data.status + ")");
        } else {
-           document.getElementById('statusText').innerText = ""; 
            document.getElementById('submitBtn_tu').disabled = false; 
            document.getElementById('submitBtn_ext').disabled = false; 
            printLog("=> ยังไม่เคยลงทะเบียน (อนุญาตให้กรอกได้)");
        }
     }
 
+    // async function handleFormSubmit(event, formId) {
+    //   event.preventDefault(); 
+      
+    //   const statusText = document.getElementById('statusText');
+    //   const submitBtn = formId === 'loginForm' ? document.getElementById('submitBtn_tu') : document.getElementById('submitBtn_ext');
+      
+    //   statusText.innerText = "กำลังตรวจสอบกับระบบ...";
+    //   statusText.style.color = "#0000ff";
+    //   submitBtn.disabled = true;
+      
+    //   const links = document.getElementsByClassName('toggle-link');
+    //   for(let i=0; i<links.length; i++) { links[i].style.display = 'none'; }
+      
+    //   printLog("=> กำลังส่งข้อมูลแบบ POST...");
+
+    //   let payload = {};
+    //   if (formId === 'loginForm') {
+    //     payload = {
+    //       action: 'register',
+    //       lineUid: document.getElementById('lineUid_tu').value,
+    //       username: document.getElementById('username').value,
+    //       password: document.getElementById('password').value
+    //     };
+    //   } else {
+    //     payload = {
+    //       action: 'register_external',
+    //       lineUid: document.getElementById('lineUid_ext').value,
+    //       idcard: document.getElementById('ext_idcard').value,
+    //       fullname: document.getElementById('ext_fullname').value,
+    //       phone: document.getElementById('ext_phone').value,
+    //       email: document.getElementById('ext_email').value,
+    //       workplace: document.getElementById('ext_workplace').value
+    //     };
+    //   }
+
+    //   try {
+    //     const response = await fetch(GAS_API_URL, {
+    //       method: 'POST',
+    //       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    //       body: JSON.stringify(payload)
+    //     });
+        
+    //     const result = await response.json();
+    //     printLog("=> ผลลัพธ์: " + result.success);
+
+    //     if (result.success) {
+    //       document.getElementById('loginForm').style.display = "none";
+    //       document.getElementById('externalForm').style.display = "none";
+    //       statusText.style.color = "#06C755";
+    //       statusText.style.fontSize = "16px";
+    //       statusText.innerText = result.message;
+    //       setTimeout(() => { if(liff.isInClient()) liff.closeWindow(); }, 2500); 
+    //     } else {
+    //       statusText.style.color = "#ff0000";
+    //       statusText.innerText = result.message;
+    //       submitBtn.disabled = false;
+    //       for(let i=0; i<links.length; i++) { links[i].style.display = 'block'; }
+    //     }
+    //   } catch (err) {
+    //     printLog("❌ API Error: " + err.message);
+    //     statusText.style.color = "#ff0000";
+    //     statusText.innerText = "เกิดข้อผิดพลาดในการเชื่อมต่อเครือข่าย กรุณาลองใหม่";
+    //     submitBtn.disabled = false;
+    //     for(let i=0; i<links.length; i++) { links[i].style.display = 'block'; }
+    //   }
+    // }
+    // 👉 [ปรับแก้] แจ้งเตือนขั้นตอนการส่งข้อมูลด้วย Swal.fire
     async function handleFormSubmit(event, formId) {
       event.preventDefault(); 
       
-      const statusText = document.getElementById('statusText');
       const submitBtn = formId === 'loginForm' ? document.getElementById('submitBtn_tu') : document.getElementById('submitBtn_ext');
-      
-      statusText.innerText = "กำลังตรวจสอบกับระบบ...";
-      statusText.style.color = "#0000ff";
       submitBtn.disabled = true;
       
       const links = document.getElementsByClassName('toggle-link');
       for(let i=0; i<links.length; i++) { links[i].style.display = 'none'; }
       
+      // แสดง Pop-up กำลังโหลดข้อมูล
+      Swal.fire({
+        title: 'กำลังตรวจสอบข้อมูล...',
+        text: 'กรุณารอสักครู่ ระบบกำลังเชื่อมต่อกับมหาวิทยาลัย',
+        allowOutsideClick: false,
+        didOpen: () => { Swal.showLoading(); }
+      });
+
       printLog("=> กำลังส่งข้อมูลแบบ POST...");
 
       let payload = {};
@@ -232,20 +342,35 @@
         if (result.success) {
           document.getElementById('loginForm').style.display = "none";
           document.getElementById('externalForm').style.display = "none";
-          statusText.style.color = "#06C755";
-          statusText.style.fontSize = "16px";
-          statusText.innerText = result.message;
-          setTimeout(() => { if(liff.isInClient()) liff.closeWindow(); }, 2500); 
+          
+          Swal.fire({
+            icon: 'success',
+            title: 'ดำเนินการสำเร็จ!',
+            text: result.message,
+            confirmButtonColor: '#06C755',
+            timer: 3000,
+            timerProgressBar: true
+          }).then(() => {
+            if(liff.isInClient()) liff.closeWindow();
+          });
         } else {
-          statusText.style.color = "#ff0000";
-          statusText.innerText = result.message;
+          Swal.fire({
+            icon: 'error',
+            title: 'ไม่สามารถผูกบัญชีได้',
+            text: result.message,
+            confirmButtonColor: '#d33'
+          });
           submitBtn.disabled = false;
           for(let i=0; i<links.length; i++) { links[i].style.display = 'block'; }
         }
       } catch (err) {
         printLog("❌ API Error: " + err.message);
-        statusText.style.color = "#ff0000";
-        statusText.innerText = "เกิดข้อผิดพลาดในการเชื่อมต่อเครือข่าย กรุณาลองใหม่";
+        Swal.fire({
+          icon: 'error',
+          title: 'ข้อผิดพลาดเครือข่าย',
+          text: 'ไม่สามารถเชื่อมต่อระบบได้ กรุณาตรวจสอบอินเทอร์เน็ตแล้วลองใหม่อีกครั้ง',
+          confirmButtonColor: '#d33'
+        });
         submitBtn.disabled = false;
         for(let i=0; i<links.length; i++) { links[i].style.display = 'block'; }
       }
