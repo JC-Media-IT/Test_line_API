@@ -197,21 +197,26 @@
                icon: 'success',
                title: 'ลงทะเบียนแล้ว',
                text: 'ท่านได้ลงทะเบียนผูกบัญชีเรียบร้อยแล้ว สามารถใช้งานแชตได้ทันที',
-               confirmButtonColor: '#06C755'
+               confirmButtonColor: '#06C755',
+               confirmButtonText: 'ปิดหน้านี้'
+             }).then(() => {
+               if(liff.isInClient()) liff.closeWindow();
              });
            } else if (data.status === 'Rejected') {
              Swal.fire({
                icon: 'error',
                title: 'ถูกปฏิเสธการเข้าใช้งาน',
                text: 'คำขอลงทะเบียนของท่านถูกปฏิเสธการเข้าใช้งาน โปรดติดต่อแอดมิน',
-               confirmButtonColor: '#d33'
+               confirmButtonColor: '#d33',
+               confirmButtonText: 'ตกลง'
              });
            } else {
              Swal.fire({
                icon: 'warning',
                title: 'อยู่ระหว่างรอการอนุมัติ',
                text: 'บัญชีของท่าน (บุคคลภายนอก) กำลังอยู่ระหว่างรอแอดมินตรวจสอบและอนุมัติ',
-               confirmButtonColor: '#f39c12'
+               confirmButtonColor: '#f39c12',
+               confirmButtonText: 'รับทราบ'
              });
            }
            
