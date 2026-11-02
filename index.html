@@ -23,6 +23,10 @@
     .toggle-link:hover { color: #004499; }
     #externalForm { display: none; }
     #debugBox { display: none; width: 90%; max-width: 400px; background: #111; color: #0f0; font-family: monospace; font-size: 12px; padding: 10px; margin-top: 20px; border-radius: 8px; text-align: left; overflow-y: auto; max-height: 150px; word-wrap: break-word; }
+    .form-group { text-align: left; margin-bottom: 18px; }
+    .form-group label { display: block; font-size: 14px; color: #444; font-weight: bold; margin-bottom: 8px; margin-left: 4px; }
+    .form-group input { margin-bottom: 0; } /* ลบ margin เดิมของ input ออกเพื่อไม่ให้ห่างเกินไป */
+    .guide-text { font-size: 12px; color: #666; text-align: left; margin: 6px 0 0 4px; line-height: 1.5; padding: 8px; background-color: #f9f9f9; border-left: 3px solid #06C755; border-radius: 4px; }
   </style>
 </head>
 <body>
@@ -34,32 +38,72 @@
     <!-- ฟอร์มสำหรับบุคลากร/นักศึกษา มธ. -->
     <form id="loginForm" onsubmit="handleFormSubmit(event, 'loginForm')">
       <input type="hidden" id="lineUid_tu" name="lineUid" value="">
-      <input type="text" id="username" name="username" placeholder="รหัสนักศึกษา หรือ Username" required>
-      <input type="password" id="password" name="password" placeholder="รหัสผ่าน" required>
+      
+      <div class="form-group">
+        <label for="username">รหัสนักศึกษา หรือ Username</label>
+        <input type="text" id="username" name="username" placeholder="กรอกรหัสนักศึกษา หรือ Username" required>
+        <!-- ข้อความแนะนำ -->
+        <!-- ข้อความแนะนำ -->
+        <div class="guide-text">
+          • <b>บุคลากรภายในคณะฯ:</b> กรอก Username เฉพาะส่วนด้านหน้า โดยไม่ต้องใส่ @tu.ac.th (รหัสผ่านเดียวกับ @tu.ac.th)<br>
+          • <b>นักศึกษา:</b> กรอกรหัสนักศึกษา 10 หลัก (รหัสผ่านเดียวกับ @dome.tu.ac.th)<br>
+          <span style="color: #d9534f; font-size: 11px; margin-left: 10px;">(*หมายเหตุ: นักศึกษาต่างคณะฯ สามารถลงทะเบียนผ่านฟอร์มนี้ได้เช่นกัน)</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="password">รหัสผ่าน (Password)</label>
+        <input type="password" id="password" name="password" placeholder="กรอกรหัสผ่าน" required>
+      </div>
+
       <button type="submit" id="submitBtn_tu" disabled>เข้าสู่ระบบและผูกบัญชี</button>
       
       <div class="pdpa-link">
         <a href="https://jc.tu.ac.th/th/pdpa" target="_blank">นโยบายคุ้มครองข้อมูลส่วนบุคคล</a>
       </div>
       
-      <a class="toggle-link" onclick="toggleForm('external')">สำหรับบุคลากรภายนอก มธ. กรุณาคลิกที่นี่</a>
+      <a class="toggle-link" onclick="toggleForm('external')">สำหรับบุคลากรภายนอกคณะฯ และภายนอก มธ. กรุณาคลิกที่นี่</a>
     </form>
 
     <!-- ฟอร์มสำหรับบุคลากรภายนอก -->
     <form id="externalForm" onsubmit="handleFormSubmit(event, 'externalForm')">
       <input type="hidden" id="lineUid_ext" name="lineUid" value="">
-      <input type="text" id="ext_idcard" placeholder="รหัสบัตรประชาชน (10 หลัก)" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '');" required>
-      <input type="text" id="ext_fullname" placeholder="ชื่อ-นามสกุล" required>
-      <input type="tel" id="ext_phone" placeholder="เบอร์โทรศัพท์ (10 หลัก)" pattern="0[0-9]{9}" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '');" required>
-      <input type="email" id="ext_email" placeholder="อีเมล (Email)" required>
-      <input type="text" id="ext_workplace" placeholder="สถานที่ทำงาน / หน่วยงาน" required>
+      
+      <div class="form-group">
+        <label for="ext_idcard">รหัสบัตรประจำตัวประชาชน</label>
+        <input type="text" id="ext_idcard" placeholder="กรอกรหัสบัตรประชาชน (10 หลัก)" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '');" required>
+      </div>
+
+      <div class="form-group">
+        <label for="ext_fullname">ชื่อ-นามสกุล</label>
+        <input type="text" id="ext_fullname" placeholder="กรอกชื่อ-นามสกุล" required>
+      </div>
+
+      <div class="form-group">
+        <label for="ext_phone">เบอร์โทรศัพท์</label>
+        <input type="tel" id="ext_phone" placeholder="กรอกเบอร์โทรศัพท์ (10 หลัก)" pattern="0[0-9]{9}" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '');" required>
+      </div>
+
+      <div class="form-group">
+        <label for="ext_email">อีเมล (Email)</label>
+        <input type="email" id="ext_email" placeholder="กรอกอีเมลที่ใช้งาน" 
+               pattern="^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$" 
+               title="กรุณากรอกรูปแบบอีเมลให้ถูกต้อง เช่น name@gmail.com หรือ name@company.co.th" 
+               required>
+      </div>
+
+      <div class="form-group">
+        <label for="ext_workplace">สถานที่ทำงาน / หน่วยงาน</label>
+        <input type="text" id="ext_workplace" placeholder="กรอกสถานที่ทำงาน หรือ หน่วยงาน" required>
+      </div>
+
       <button type="submit" id="submitBtn_ext" disabled>ลงทะเบียนบุคลากรภายนอก</button>
       
       <div class="pdpa-link">
         <a href="https://jc.tu.ac.th/th/pdpa" target="_blank">นโยบายคุ้มครองข้อมูลส่วนบุคคล</a>
       </div>
       
-      <a class="toggle-link" onclick="toggleForm('tu')">กลับไปหน้าเข้าสู่ระบบสำหรับ มธ.</a>
+      <a class="toggle-link" onclick="toggleForm('tu')">กลับไปหน้าเข้าสู่ระบบสำหรับบุคลากรภายในคณะฯ</a>
     </form>
 
     <div id="statusText" class="status">กำลังโหลดข้อมูลระบบ...</div>
