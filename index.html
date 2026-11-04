@@ -65,7 +65,7 @@
         <a href="https://jc.tu.ac.th/th/pdpa" target="_blank">นโยบายคุ้มครองข้อมูลส่วนบุคคล</a>
       </div>
       
-      <a class="toggle-link" onclick="toggleForm('external')">สำหรับบุคลากรภายนอกคณะฯ และภายนอก มธ. <br>กรุณาคลิกที่นี่</a>
+      <a class="toggle-link" onclick="toggleForm('external')">สำหรับบุคลากรภายนอกคณะฯ และบุคคลทั่วไป <br>กรุณาคลิกที่นี่</a>
     </form>
 
     <!-- ฟอร์มสำหรับบุคลากรภายนอก -->
@@ -100,7 +100,25 @@
         <input type="text" id="ext_workplace" placeholder="กรอกสถานที่ทำงาน หรือ หน่วยงาน" required>
       </div>
 
-      <button type="submit" id="submitBtn_ext" disabled>ลงทะเบียนบุคลากรภายนอก</button>
+      <!-- 👉 Dropdown เลือกประเภทบุคคลภายนอก -->
+      <div class="form-group">
+        <label for="ext_usertype">ประเภทบุคคลภายนอก</label>
+        <select id="ext_usertype" onchange="toggleOtherInput()" required style="width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; background-color: white;">
+          <option value="" disabled selected>-- กรุณาเลือกประเภท --</option>
+          <option value="ศิษย์เก่า">ศิษย์เก่า</option>
+          <option value="วิทยากร">วิทยากร</option>
+          <option value="บุคคลทั่วไป">บุคคลทั่วไป</option>
+          <option value="อื่นๆ">อื่นๆ</option>
+        </select>
+      </div>
+
+      <!-- 👉 ช่องกรอกข้อความ (จะแสดงเมื่อเลือก "อื่นๆ") -->
+      <div class="form-group" id="otherTypeGroup" style="display: none;">
+        <label for="ext_usertype_other">โปรดระบุประเภท</label>
+        <input type="text" id="ext_usertype_other" placeholder="โปรดระบุประเภทบุคคลภายนอก">
+      </div>
+
+      <button type="submit" id="submitBtn_ext" disabled>ลงทะเบียนบุคคลทั่วไป</button>
       
       <div class="pdpa-link">
         <a href="https://jc.tu.ac.th/th/pdpa" target="_blank">นโยบายคุ้มครองข้อมูลส่วนบุคคล</a>
@@ -120,6 +138,22 @@
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbyuny26eANQK5BxmXk1cIT3oLYZr1cyhTFnMUGvk2WnZ9_7fwxnaZteQqpXgnEC19MC/exec";
 
     function printLog(msg) { document.getElementById('debugBox').innerHTML += msg + "<br>"; }
+
+    // สลับการแสดงผลช่อง "โปรดระบุ"
+    function toggleOtherInput() {
+      const typeSelect = document.getElementById('ext_usertype');
+      const otherGroup = document.getElementById('otherTypeGroup');
+      const otherInput = document.getElementById('ext_usertype_other');
+
+      if (typeSelect.value === 'อื่นๆ') {
+        otherGroup.style.display = 'block';
+        otherInput.required = true; // บังคับกรอก
+      } else {
+        otherGroup.style.display = 'none';
+        otherInput.required = false; // ยกเลิกบังคับกรอก
+        otherInput.value = ''; // เคลียร์ค่าทิ้ง
+      }
+    }
 
     function toggleForm(type) {
       if (type === 'external') {
@@ -277,7 +311,7 @@
              Swal.fire({
                icon: 'warning',
                title: 'อยู่ระหว่างรอการอนุมัติ',
-               text: 'บัญชีของท่าน (บุคคลภายนอก) กำลังอยู่ระหว่างรอแอดมินตรวจสอบและอนุมัติ',
+               text: 'บัญชีของท่าน (บุคคลทั่วไป) กำลังอยู่ระหว่างรอแอดมินตรวจสอบและอนุมัติ',
                confirmButtonColor: '#f39c12',
                confirmButtonText: 'รับทราบ'
              });
@@ -389,6 +423,12 @@
           password: document.getElementById('password').value
         };
       } else {
+        // 👉 เช็คว่าถ้าเลือก "อื่นๆ" ให้ดึงข้อความจากช่องพิมพ์มาต่อท้าย
+        let finalUserType = document.getElementById('ext_usertype').value;
+        if (finalUserType === 'อื่นๆ') {
+          finalUserType = "อื่นๆ (" + document.getElementById('ext_usertype_other').value + ")";
+        }
+
         payload = {
           action: 'register_external',
           lineUid: document.getElementById('lineUid_ext').value,
@@ -396,9 +436,21 @@
           fullname: document.getElementById('ext_fullname').value,
           phone: document.getElementById('ext_phone').value,
           email: document.getElementById('ext_email').value,
-          workplace: document.getElementById('ext_workplace').value
+          workplace: document.getElementById('ext_workplace').value,
+          usertype: finalUserType // 👉 ส่งค่าประเภทที่ผ่านการเช็คแล้ว
         };
       }
+
+      //   payload = {
+      //     action: 'register_external',
+      //     lineUid: document.getElementById('lineUid_ext').value,
+      //     idcard: document.getElementById('ext_idcard').value,
+      //     fullname: document.getElementById('ext_fullname').value,
+      //     phone: document.getElementById('ext_phone').value,
+      //     email: document.getElementById('ext_email').value,
+      //     workplace: document.getElementById('ext_workplace').value
+      //   };
+      // }
 
       try {
         const response = await fetch(GAS_API_URL, {
