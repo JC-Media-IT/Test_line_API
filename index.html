@@ -59,9 +59,11 @@
       <div class="form-group">
         <label for="password">รหัสผ่าน (Password)</label>
         <div style="position: relative;">
-          <input type="password" id="password" name="password" placeholder="กรอกรหัสผ่าน" style="padding-right: 40px;" required>
-          <!-- ตั้งค่าเริ่มต้นเป็นไอคอนตาเปิด -->
-          <span id="togglePassword" onclick="togglePasswordVisibility()" style="position: absolute; right: 15px; top: 40%; transform: translateY(-50%); cursor: pointer; user-select: none; color: #666;">
+          <!-- เพิ่ม padding-right เป็น 55px เพื่อเผื่อพื้นที่ให้ปุ่มสี่เหลี่ยม -->
+          <input type="password" id="password" name="password" placeholder="กรอกรหัสผ่าน" style="padding-right: 55px; width: 100%; box-sizing: border-box;" required>
+          
+          <!-- เพิ่ม border, padding, background และปรับตำแหน่งให้อยู่ตรงกลางพอดี (top: 50%) -->
+          <span id="togglePassword" onclick="togglePasswordVisibility()" style="position: absolute; right: 5px; top: 50%; transform: translateY(-50%); cursor: pointer; user-select: none; color: #666; border: 1px solid #ccc; border-radius: 4px; padding: 6px 10px; background-color: #f8f9fa; display: flex; align-items: center; justify-content: center;">
             <i class="fa-solid fa-eye"></i>
           </span>
         </div>
