@@ -56,7 +56,12 @@
 
       <div class="form-group">
         <label for="password">รหัสผ่าน (Password)</label>
-        <input type="password" id="password" name="password" placeholder="กรอกรหัสผ่าน" required>
+        <div style="position: relative;">
+          <!-- เพิ่ม padding-right เผื่อพื้นที่ให้ไอคอนรูปตา -->
+          <input type="password" id="password" name="password" placeholder="กรอกรหัสผ่าน" style="padding-right: 40px;" required>
+          <!-- ปุ่มเปิด/ปิด รหัสผ่าน -->
+          <span id="togglePassword" onclick="togglePasswordVisibility()" style="position: absolute; right: 15px; top: 40%; transform: translateY(-50%); cursor: pointer; user-select: none;">👁️</span>
+        </div>
       </div>
 
       <button type="submit" id="submitBtn_tu" disabled>เข้าสู่ระบบและผูกบัญชี</button>
@@ -115,7 +120,7 @@
       <!-- 👉 ช่องกรอกข้อความ (จะแสดงเมื่อเลือก "อื่นๆ") -->
       <div class="form-group" id="otherTypeGroup" style="display: none;">
         <label for="ext_usertype_other">โปรดระบุประเภท</label>
-        <input type="text" id="ext_usertype_other" placeholder="โปรดระบุประเภทบุคคล">
+        <input type="text" id="ext_usertype_other" placeholder="โปรดระบุประเภทบุคคลภายนอก">
       </div>
 
       <button type="submit" id="submitBtn_ext" disabled>ลงทะเบียนบุคคลทั่วไป</button>
@@ -152,6 +157,20 @@
         otherGroup.style.display = 'none';
         otherInput.required = false; // ยกเลิกบังคับกรอก
         otherInput.value = ''; // เคลียร์ค่าทิ้ง
+      }
+    }
+
+    // ฟังก์ชันสลับการแสดงรหัสผ่าน
+    function togglePasswordVisibility() {
+      const passwordInput = document.getElementById('password');
+      const toggleIcon = document.getElementById('togglePassword');
+      
+      if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        toggleIcon.innerText = '🙈'; // เปลี่ยนไอคอนเมื่อแสดงรหัสผ่าน
+      } else {
+        passwordInput.type = 'password';
+        toggleIcon.innerText = '👁️'; // เปลี่ยนไอคอนกลับเมื่อซ่อนรหัสผ่าน
       }
     }
 
