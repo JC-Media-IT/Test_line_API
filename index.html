@@ -22,11 +22,9 @@
     .status { margin-top: 15px; font-size: 14px; color: #ff0000; font-weight: bold; }
     .pdpa-link { display: block; font-size: 12px; margin-top: 12px; color: #555; }
     .pdpa-link a { color: #0066cc; text-decoration: underline; }
-    #debugBox { width: 90%; max-width: 400px; background: #111; color: #0f0; font-family: monospace; font-size: 12px; padding: 10px; margin-top: 20px; border-radius: 8px; text-align: left; overflow-y: auto; max-height: 150px; word-wrap: break-word; }
     .toggle-link { display: block; margin-top: 20px; font-size: 14px; color: #0066cc; text-decoration: underline; cursor: pointer; }
     .toggle-link:hover { color: #004499; }
     #externalForm { display: none; }
-    #debugBox { display: none; width: 90%; max-width: 400px; background: #111; color: #0f0; font-family: monospace; font-size: 12px; padding: 10px; margin-top: 20px; border-radius: 8px; text-align: left; overflow-y: auto; max-height: 150px; word-wrap: break-word; }
     .form-group { text-align: left; margin-bottom: 18px; }
     .form-group label { display: block; font-size: 14px; color: #444; font-weight: bold; margin-bottom: 8px; margin-left: 4px; }
     .form-group input { margin-bottom: 0; } /* ลบ margin เดิมของ input ออกเพื่อไม่ให้ห่างเกินไป */
@@ -140,16 +138,12 @@
     <div id="statusText" class="status">กำลังโหลดข้อมูลระบบ...</div>
   </div>
 
-  <div id="debugBox" style="display: none;">--- System Logs ---<br></div>
-
   <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   
   <script>
-    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbyuny26eANQK5BxmXk1cIT3oLYZr1cyhTFnMUGvk2WnZ9_7fwxnaZteQqpXgnEC19MC/exec";
+    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbyqozrLYjTAu1gYoB75c3WSaIYVQtEQvMYy7BDi26Zup7DacXMTMrjco-DtY1uQQ40Riw/exec";
 
-    function printLog(msg) { document.getElementById('debugBox').innerHTML += msg + "<br>"; }
-
-    // สลับการแสดงผลช่อง "โปรดระบุ"
+      // สลับการแสดงผลช่อง "โปรดระบุ"
     function toggleOtherInput() {
       const typeSelect = document.getElementById('ext_usertype');
       const otherGroup = document.getElementById('otherTypeGroup');
