@@ -80,9 +80,10 @@
     <form id="externalForm" onsubmit="handleFormSubmit(event, 'externalForm')">
       <input type="hidden" id="lineUid_ext" name="lineUid" value="">
       
+      <!-- แก้ไข input เลขบัตรประชาชนเป็น 13 หลัก -->
       <div class="form-group">
         <label for="ext_idcard">รหัสบัตรประจำตัวประชาชน</label>
-        <input type="text" id="ext_idcard" placeholder="กรอกรหัสบัตรประชาชน (10 หลัก)" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '');" required>
+        <input type="text" id="ext_idcard" placeholder="กรอกรหัสบัตรประชาชน (13 หลัก)" pattern="[0-9]{13}" maxlength="13" oninput="this.value = this.value.replace(/[^0-9]/g, '');" required>
       </div>
 
       <div class="form-group">
