@@ -262,32 +262,7 @@
        document.body.appendChild(script);
     }
 
-    // function handleCheckResult(data) {
-    //    if (data.registered) {
-    //        document.getElementById('loginForm').style.display = "none";
-    //        document.getElementById('externalForm').style.display = "none";
-    //        const statusText = document.getElementById('statusText');
-           
-    //        if (data.status === 'Approved') {
-    //          statusText.innerText = "✅ ท่านได้ลงทะเบียนผูกบัญชีเรียบร้อยแล้ว";
-    //          statusText.style.color = "#06C755";
-    //        } else if (data.status === 'Rejected') {
-    //          statusText.innerText = "❌ คำขอลงทะเบียนของท่านถูกปฏิเสธ";
-    //          statusText.style.color = "#ff3333";
-    //        } else {
-    //          statusText.innerText = "⏳ บัญชีของท่านอยู่ระหว่างรอแอดมินอนุมัติ";
-    //          statusText.style.color = "#ff9900";
-    //        }
-           
-    //        statusText.style.fontSize = "18px";
-    //        printLog("=> พบประวัติ: ท่านเคยลงทะเบียนแล้ว (Status: " + data.status + ")");
-    //    } else {
-    //        document.getElementById('statusText').innerText = ""; 
-    //        document.getElementById('submitBtn_tu').disabled = false; 
-    //        document.getElementById('submitBtn_ext').disabled = false; 
-    //        printLog("=> ยังไม่เคยลงทะเบียน (อนุญาตให้กรอกได้)");
-    //    }
-    // }
+    
     // 👉 [ปรับแก้] แสดงทั้ง Swal.fire และ Text สถานะด้านล่าง
     function handleCheckResult(data) {
        const statusText = document.getElementById('statusText');
@@ -346,72 +321,7 @@
        }
     }
 
-    // async function handleFormSubmit(event, formId) {
-    //   event.preventDefault(); 
-      
-    //   const statusText = document.getElementById('statusText');
-    //   const submitBtn = formId === 'loginForm' ? document.getElementById('submitBtn_tu') : document.getElementById('submitBtn_ext');
-      
-    //   statusText.innerText = "กำลังตรวจสอบกับระบบ...";
-    //   statusText.style.color = "#0000ff";
-    //   submitBtn.disabled = true;
-      
-    //   const links = document.getElementsByClassName('toggle-link');
-    //   for(let i=0; i<links.length; i++) { links[i].style.display = 'none'; }
-      
-    //   printLog("=> กำลังส่งข้อมูลแบบ POST...");
-
-    //   let payload = {};
-    //   if (formId === 'loginForm') {
-    //     payload = {
-    //       action: 'register',
-    //       lineUid: document.getElementById('lineUid_tu').value,
-    //       username: document.getElementById('username').value,
-    //       password: document.getElementById('password').value
-    //     };
-    //   } else {
-    //     payload = {
-    //       action: 'register_external',
-    //       lineUid: document.getElementById('lineUid_ext').value,
-    //       idcard: document.getElementById('ext_idcard').value,
-    //       fullname: document.getElementById('ext_fullname').value,
-    //       phone: document.getElementById('ext_phone').value,
-    //       email: document.getElementById('ext_email').value,
-    //       workplace: document.getElementById('ext_workplace').value
-    //     };
-    //   }
-
-    //   try {
-    //     const response = await fetch(GAS_API_URL, {
-    //       method: 'POST',
-    //       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    //       body: JSON.stringify(payload)
-    //     });
-        
-    //     const result = await response.json();
-    //     printLog("=> ผลลัพธ์: " + result.success);
-
-    //     if (result.success) {
-    //       document.getElementById('loginForm').style.display = "none";
-    //       document.getElementById('externalForm').style.display = "none";
-    //       statusText.style.color = "#06C755";
-    //       statusText.style.fontSize = "16px";
-    //       statusText.innerText = result.message;
-    //       setTimeout(() => { if(liff.isInClient()) liff.closeWindow(); }, 2500); 
-    //     } else {
-    //       statusText.style.color = "#ff0000";
-    //       statusText.innerText = result.message;
-    //       submitBtn.disabled = false;
-    //       for(let i=0; i<links.length; i++) { links[i].style.display = 'block'; }
-    //     }
-    //   } catch (err) {
-    //     printLog("❌ API Error: " + err.message);
-    //     statusText.style.color = "#ff0000";
-    //     statusText.innerText = "เกิดข้อผิดพลาดในการเชื่อมต่อเครือข่าย กรุณาลองใหม่";
-    //     submitBtn.disabled = false;
-    //     for(let i=0; i<links.length; i++) { links[i].style.display = 'block'; }
-    //   }
-    // }
+   
     // 👉 [ปรับแก้] แจ้งเตือนขั้นตอนการส่งข้อมูลด้วย Swal.fire
     async function handleFormSubmit(event, formId) {
       event.preventDefault(); 
