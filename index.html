@@ -148,6 +148,9 @@
     // ⚠️ หากย้ายไปใช้ LINE OA ใหม่ ให้เปลี่ยนเป็น LIFF ID ตัวใหม่ที่นี่
     const LIFF_ID = "2012784445-iQz17cDh";
 
+   // เพิ่มตัวแปรระดับ Global ไว้ด้านบนสุดคู่กับ LIFF_ID
+    let userLineDisplayName = "";
+
     // สลับการแสดงผลช่อง "โปรดระบุ"
     function toggleOtherInput() {
       const typeSelect = document.getElementById('ext_usertype');
@@ -203,10 +206,11 @@
 
         if (liff.isInClient()) {
           const profile = await liff.getProfile();
+          userLineDisplayName = profile.displayName || "-"; // 👈 เก็บชื่อบัญชี LINE ไว้
           document.getElementById('lineUid_tu').value = profile.userId;
           document.getElementById('lineUid_ext').value = profile.userId;
           checkUserRegistration(profile.userId);
-        } else {
+        }else {
           document.getElementById('loginForm').style.display = "none";
           document.getElementById('externalForm').style.display = "none";
           document.getElementById('statusText').innerText = "❌ กรุณาเปิดลิงก์นี้ผ่านแอปพลิเคชัน LINE เท่านั้น";
@@ -312,6 +316,7 @@
         payload = {
           action: 'register',
           lineUid: document.getElementById('lineUid_tu').value,
+          lineName: userLineDisplayName, // 👈 เพิ่มบรรทัดนี้
           username: document.getElementById('username').value,
           password: document.getElementById('password').value
         };
@@ -324,6 +329,7 @@
         payload = {
           action: 'register_external',
           lineUid: document.getElementById('lineUid_ext').value,
+          lineName: userLineDisplayName, // 👈 เพิ่มบรรทัดนี้
           idcard: document.getElementById('ext_idcard').value,
           fullname: document.getElementById('ext_fullname').value,
           phone: document.getElementById('ext_phone').value,
