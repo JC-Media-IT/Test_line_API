@@ -141,10 +141,14 @@
 
   <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   
-  <script>
+ <script>
+    // ⚠️ ตรวจสอบให้ตรงกับ Web App URL ล่าสุดของ Google Apps Script
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbyqozrLYjTAu1gYoB75c3WSaIYVQtEQvMYy7BDi26Zup7DacXMTMrjco-DtY1uQQ40Riw/exec";
+    
+    // ⚠️ หากย้ายไปใช้ LINE OA ใหม่ ให้เปลี่ยนเป็น LIFF ID ตัวใหม่ที่นี่
+    const LIFF_ID = "2012279055-k6VHlNqv";
 
-      // สลับการแสดงผลช่อง "โปรดระบุ"
+    // สลับการแสดงผลช่อง "โปรดระบุ"
     function toggleOtherInput() {
       const typeSelect = document.getElementById('ext_usertype');
       const otherGroup = document.getElementById('otherTypeGroup');
@@ -152,11 +156,11 @@
 
       if (typeSelect.value === 'อื่นๆ') {
         otherGroup.style.display = 'block';
-        otherInput.required = true; // บังคับกรอก
+        otherInput.required = true;
       } else {
         otherGroup.style.display = 'none';
-        otherInput.required = false; // ยกเลิกบังคับกรอก
-        otherInput.value = ''; // เคลียร์ค่าทิ้ง
+        otherInput.required = false;
+        otherInput.value = '';
       }
     }
 
@@ -167,13 +171,14 @@
       
       if (passwordInput.type === 'password') {
         passwordInput.type = 'text';
-        toggleIcon.innerHTML = '<i class="fa-solid fa-eye-slash"></i>'; // เปลี่ยนไอคอนเมื่อแสดงรหัสผ่าน
+        toggleIcon.innerHTML = '<i class="fa-solid fa-eye-slash"></i>';
       } else {
         passwordInput.type = 'password';
-        toggleIcon.innerHTML = '<i class="fa-solid fa-eye"></i>'; // เปลี่ยนไอคอนกลับเมื่อซ่อนรหัสผ่าน
+        toggleIcon.innerHTML = '<i class="fa-solid fa-eye"></i>';
       }
     }
 
+    // สลับฟอร์ม มธ. / บุคคลภายนอก
     function toggleForm(type) {
       if (type === 'external') {
         document.getElementById('loginForm').style.display = 'none';
@@ -184,8 +189,8 @@
       }
     }
 
-   async function initializeLiff() {
-      // 👉 [เพิ่มใหม่] แสดง Loading SweetAlert ทันทีที่เปิดหน้าเว็บขึ้นมา
+    // เริ่มต้นการทำงานของ LIFF
+    async function initializeLiff() {
       Swal.fire({
         title: 'กำลังโหลดข้อมูลระบบ...',
         text: 'กรุณารอสักครู่ ระบบกำลังเชื่อมต่อบริการ LINE',
@@ -193,24 +198,18 @@
         didOpen: () => { Swal.showLoading(); }
       });
 
-      printLog("1. กำลังโหลด LIFF SDK...");
       try {
-        await liff.init({ liffId: "2012279055-k6VHlNqv" });
-        printLog("2. LIFF init สำเร็จ");
-        // 👉 [ปรับแก้] ตรวจสอบว่าเปิดผ่าน In-Client Browser ของแอป LINE หรือไม่
+        await liff.init({ liffId: LIFF_ID });
+
         if (liff.isInClient()) {
           const profile = await liff.getProfile();
-          printLog("3. LINE ID: " + profile.userId);
-          
           document.getElementById('lineUid_tu').value = profile.userId;
           document.getElementById('lineUid_ext').value = profile.userId;
-          
-          printLog("=> กำลังตรวจสอบประวัติการลงทะเบียน...");
           checkUserRegistration(profile.userId);
         } else {
-          // 👉 บล็อกผู้ใช้งานที่เปิดผ่าน External Browser (Chrome, Safari, PC)
           document.getElementById('loginForm').style.display = "none";
           document.getElementById('externalForm').style.display = "none";
+          document.getElementById('statusText').innerText = "❌ กรุณาเปิดลิงก์นี้ผ่านแอปพลิเคชัน LINE เท่านั้น";
           
           Swal.fire({
             icon: 'error',
@@ -219,8 +218,6 @@
             allowOutsideClick: false,
             showConfirmButton: false
           });
-          
-          printLog("❌ บล็อกการเข้าถึง: เปิดผ่านโปรแกรมภายนอก (ไม่ได้เปิดในแอป LINE)");
         }
       } catch (err) {
         Swal.fire({
@@ -229,101 +226,71 @@
           text: 'ไม่สามารถเชื่อมต่อระบบ LIFF ได้: ' + err.message,
           confirmButtonColor: '#d33'
         });
-        printLog("❌ Error: " + err.message);
       }
     }
 
-    //     if (liff.isLoggedIn() || liff.isInClient()) {
-    //       const profile = await liff.getProfile();
-    //       printLog("3. LINE ID: " + profile.userId);
-          
-    //       document.getElementById('lineUid_tu').value = profile.userId;
-    //       document.getElementById('lineUid_ext').value = profile.userId;
-          
-    //       printLog("=> กำลังตรวจสอบประวัติการลงทะเบียน...");
-    //       checkUserRegistration(profile.userId);
-    //     } else {
-    //       Swal.close(); // ปิด loading หากไม่ได้เปิดบน LINE
-    //       printLog("3. ไม่ได้เปิดผ่านแอป LINE");
-    //     }
-    //   } catch (err) {
-    //     Swal.fire({
-    //       icon: 'error',
-    //       title: 'ข้อผิดพลาดระบบ',
-    //       text: 'ไม่สามารถโหลดระบบ LIFF ได้: ' + err.message,
-    //       confirmButtonColor: '#d33'
-    //     });
-    //     printLog("❌ Error: " + err.message);
-    //   }
-    // }
-
+    // ตรวจสอบประวัติการลงทะเบียนด้วย JSONP
     function checkUserRegistration(uid) {
-       const script = document.createElement('script');
-       script.src = GAS_API_URL + "?action=check&lineUid=" + uid + "&callback=handleCheckResult";
-       document.body.appendChild(script);
+      const script = document.createElement('script');
+      script.src = GAS_API_URL + "?action=check&lineUid=" + encodeURIComponent(uid) + "&callback=handleCheckResult";
+      document.body.appendChild(script);
     }
 
-    
-    // 👉 [ปรับแก้] แสดงทั้ง Swal.fire และ Text สถานะด้านล่าง
+    // จัดการผลลัพธ์การตรวจสอบสถานะ
     function handleCheckResult(data) {
-       const statusText = document.getElementById('statusText');
-       
-       if (data.registered) {
-           document.getElementById('loginForm').style.display = "none";
-           document.getElementById('externalForm').style.display = "none";
-           
-           if (data.status === 'Approved') {
-             statusText.innerText = "✅ ท่านได้ลงทะเบียนผูกบัญชีเรียบร้อยแล้ว";
-             statusText.style.color = "#06C755";
+      const statusText = document.getElementById('statusText');
+      
+      if (data.registered) {
+        document.getElementById('loginForm').style.display = "none";
+        document.getElementById('externalForm').style.display = "none";
+        
+        if (data.status === 'Approved') {
+          statusText.innerText = "✅ ท่านได้ลงทะเบียนผูกบัญชีเรียบร้อยแล้ว";
+          statusText.style.color = "#06C755";
 
-             Swal.fire({
-               icon: 'success',
-               title: 'ลงทะเบียนแล้ว',
-               text: 'ท่านได้ลงทะเบียนผูกบัญชีเรียบร้อยแล้ว สามารถใช้งานแชตได้ทันที',
-               confirmButtonColor: '#06C755',
-               confirmButtonText: 'ปิดหน้านี้'
-             }).then(() => {
-               if(liff.isInClient()) liff.closeWindow();
-             });
+          Swal.fire({
+            icon: 'success',
+            title: 'ลงทะเบียนแล้ว',
+            text: 'ท่านได้ลงทะเบียนผูกบัญชีเรียบร้อยแล้ว สามารถใช้งานแชตได้ทันที',
+            confirmButtonColor: '#06C755',
+            confirmButtonText: 'ปิดหน้านี้'
+          }).then(() => {
+            if (liff.isInClient()) liff.closeWindow();
+          });
 
-           } else if (data.status === 'Rejected') {
-             statusText.innerText = "❌ คำขอลงทะเบียนของท่านถูกปฏิเสธ";
-             statusText.style.color = "#ff3333";
+        } else if (data.status === 'Rejected') {
+          statusText.innerText = "❌ คำขอลงทะเบียนของท่านถูกปฏิเสธ";
+          statusText.style.color = "#ff3333";
 
-             Swal.fire({
-               icon: 'error',
-               title: 'ถูกปฏิเสธการเข้าใช้งาน',
-               text: 'คำขอลงทะเบียนของท่านถูกปฏิเสธการเข้าใช้งาน โปรดติดต่อแอดมิน',
-               confirmButtonColor: '#d33',
-               confirmButtonText: 'ตกลง'
-             });
+          Swal.fire({
+            icon: 'error',
+            title: 'ถูกปฏิเสธการเข้าใช้งาน',
+            text: 'คำขอลงทะเบียนของท่านถูกปฏิเสธการเข้าใช้งาน โปรดติดต่อแอดมิน',
+            confirmButtonColor: '#d33',
+            confirmButtonText: 'ตกลง'
+          });
 
-           } else {
-             statusText.innerText = "⏳ บัญชีของท่านอยู่ระหว่างรอแอดมินอนุมัติ";
-             statusText.style.color = "#ff9900";
+        } else {
+          statusText.innerText = "⏳ บัญชีของท่านอยู่ระหว่างรอแอดมินอนุมัติ";
+          statusText.style.color = "#ff9900";
 
-             Swal.fire({
-               icon: 'warning',
-               title: 'อยู่ระหว่างรอการอนุมัติ',
-               text: 'บัญชีของท่าน (บุคคลทั่วไป) กำลังอยู่ระหว่างรอแอดมินตรวจสอบและอนุมัติ',
-               confirmButtonColor: '#f39c12',
-               confirmButtonText: 'รับทราบ'
-             });
-           }
-           
-           printLog("=> พบประวัติ: ท่านเคยลงทะเบียนแล้ว (Status: " + data.status + ")");
-       } else {
-           // กรณีผู้ใช้ยังไม่เคยลงทะเบียน ให้ปิด Swal Loading เพื่อให้เริ่มกรอกฟอร์มได้
-           Swal.close();
-           statusText.innerText = ""; 
-           document.getElementById('submitBtn_tu').disabled = false; 
-           document.getElementById('submitBtn_ext').disabled = false; 
-           printLog("=> ยังไม่เคยลงทะเบียน (อนุญาตให้กรอกได้)");
-       }
+          Swal.fire({
+            icon: 'warning',
+            title: 'อยู่ระหว่างรอการอนุมัติ',
+            text: 'บัญชีของท่าน (บุคคลทั่วไป) กำลังอยู่ระหว่างรอแอดมินตรวจสอบและอนุมัติ',
+            confirmButtonColor: '#f39c12',
+            confirmButtonText: 'รับทราบ'
+          });
+        }
+      } else {
+        Swal.close();
+        statusText.innerText = ""; 
+        document.getElementById('submitBtn_tu').disabled = false; 
+        document.getElementById('submitBtn_ext').disabled = false; 
+      }
     }
 
-   
-    // 👉 [ปรับแก้] แจ้งเตือนขั้นตอนการส่งข้อมูลด้วย Swal.fire
+    // ส่งข้อมูลลงทะเบียน
     async function handleFormSubmit(event, formId) {
       event.preventDefault(); 
       
@@ -331,17 +298,14 @@
       submitBtn.disabled = true;
       
       const links = document.getElementsByClassName('toggle-link');
-      for(let i=0; i<links.length; i++) { links[i].style.display = 'none'; }
+      for (let i = 0; i < links.length; i++) { links[i].style.display = 'none'; }
       
-      // แสดง Pop-up กำลังโหลดข้อมูล
       Swal.fire({
         title: 'กำลังตรวจสอบข้อมูล...',
-        text: 'กรุณารอสักครู่ ระบบกำลังเชื่อมต่อกับมหาวิทยาลัย',
+        text: 'กรุณารอสักครู่ ระบบกำลังบันทึกและตรวจสอบข้อมูล',
         allowOutsideClick: false,
         didOpen: () => { Swal.showLoading(); }
       });
-
-      printLog("=> กำลังส่งข้อมูลแบบ POST...");
 
       let payload = {};
       if (formId === 'loginForm') {
@@ -352,7 +316,6 @@
           password: document.getElementById('password').value
         };
       } else {
-        // 👉 เช็คว่าถ้าเลือก "อื่นๆ" ให้ดึงข้อความจากช่องพิมพ์มาต่อท้าย
         let finalUserType = document.getElementById('ext_usertype').value;
         if (finalUserType === 'อื่นๆ') {
           finalUserType = "อื่นๆ (" + document.getElementById('ext_usertype_other').value + ")";
@@ -366,20 +329,9 @@
           phone: document.getElementById('ext_phone').value,
           email: document.getElementById('ext_email').value,
           workplace: document.getElementById('ext_workplace').value,
-          usertype: finalUserType // 👉 ส่งค่าประเภทที่ผ่านการเช็คแล้ว
+          usertype: finalUserType
         };
       }
-
-      //   payload = {
-      //     action: 'register_external',
-      //     lineUid: document.getElementById('lineUid_ext').value,
-      //     idcard: document.getElementById('ext_idcard').value,
-      //     fullname: document.getElementById('ext_fullname').value,
-      //     phone: document.getElementById('ext_phone').value,
-      //     email: document.getElementById('ext_email').value,
-      //     workplace: document.getElementById('ext_workplace').value
-      //   };
-      // }
 
       try {
         const response = await fetch(GAS_API_URL, {
@@ -389,7 +341,6 @@
         });
         
         const result = await response.json();
-        printLog("=> ผลลัพธ์: " + result.success);
 
         if (result.success) {
           document.getElementById('loginForm').style.display = "none";
@@ -403,7 +354,7 @@
             timer: 3000,
             timerProgressBar: true
           }).then(() => {
-            if(liff.isInClient()) liff.closeWindow();
+            if (liff.isInClient()) liff.closeWindow();
           });
         } else {
           Swal.fire({
@@ -413,10 +364,9 @@
             confirmButtonColor: '#d33'
           });
           submitBtn.disabled = false;
-          for(let i=0; i<links.length; i++) { links[i].style.display = 'block'; }
+          for (let i = 0; i < links.length; i++) { links[i].style.display = 'block'; }
         }
       } catch (err) {
-        printLog("❌ API Error: " + err.message);
         Swal.fire({
           icon: 'error',
           title: 'ข้อผิดพลาดเครือข่าย',
@@ -424,7 +374,7 @@
           confirmButtonColor: '#d33'
         });
         submitBtn.disabled = false;
-        for(let i=0; i<links.length; i++) { links[i].style.display = 'block'; }
+        for (let i = 0; i < links.length; i++) { links[i].style.display = 'block'; }
       }
     }
 
